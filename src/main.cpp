@@ -4,6 +4,7 @@
 #include<sstream> //string stream
 using namespace std;
 
+
 class User {
 private:
     string userID;
@@ -68,12 +69,48 @@ public:
         return false;
     }
 
+    bool userExists(string id)
+    {
+        ifstream file("Data/users.txt");
+
+        if (!file.is_open())
+        {
+            return false;
+        }
+
+        string line;
+
+        while (getline(file, line))
+        {
+            stringstream ss(line);
+
+            string fileID;
+
+            getline(ss, fileID, ',');
+
+            if (fileID == id)
+            {
+                file.close();
+                return true;
+            }
+        }
+
+        file.close();
+        return false;
+    }
+
     void registration() {
         if (registered == false) {
             cout << "======User Registration======" << endl;
 
             cout << "Enter User ID: ";
             cin >> userID;
+
+            if (userExists(userID))
+            {
+                cout << "User ID already exists. Please use a different User ID." << endl;
+                return;
+            }
 
             cout << "Enter Password: ";
             cin >> password;
@@ -568,6 +605,192 @@ public:
     }
 
 
+    void updateDonorRequest()
+    {
+        ifstream file("Data/donations.txt");
+
+        if (!file.is_open())
+        {
+            cout << "No donor requests available." << endl;
+            return;
+        }
+
+        string lines[100];
+        int total = 0;
+
+        string line;
+
+        while (getline(file, line))
+        {
+            lines[total] = line;
+            total++;
+        }
+
+        file.close();
+
+        int pendingCount = 0;
+
+        cout << "\n======Pending Donor Requests======" << endl;
+
+        for (int i = 0; i < total; i++)
+        {
+            stringstream ss(lines[i]);
+
+            string donorID;
+            string donationType;
+            string details;
+            string address;
+            string status;
+
+            getline(ss, donorID, ',');
+            getline(ss, donationType, ',');
+            getline(ss, details, ',');
+            getline(ss, address, ',');
+            getline(ss, status, ',');
+
+            if (status == "Pending")
+            {
+                pendingCount++;
+
+                cout << pendingCount << ". "
+                     << "Donor ID: " << donorID
+                     << " | Blood Group: " << donationType
+                     << " | Address: " << address << endl;
+            }
+        }
+
+        if (pendingCount == 0)
+        {
+            cout << "No pending donor requests." << endl;
+            return;
+        }
+
+        int selected;
+        cout << "\nSelect Donor: ";
+        cin >> selected;
+
+        if (selected < 1 || selected > pendingCount)
+        {
+            cout << "Invalid Choice." << endl;
+            return;
+        }
+
+        int currentPending = 0;
+
+        for (int i = 0; i < total; i++)
+        {
+            stringstream ss(lines[i]);
+
+            string donorID;
+            string donationType;
+            string details;
+            string address;
+            string status;
+
+            getline(ss, donorID, ',');
+            getline(ss, donationType, ',');
+            getline(ss, details, ',');
+            getline(ss, address, ',');
+            getline(ss, status, ',');
+
+            if (status == "Pending")
+            {
+                currentPending++;
+
+                if (currentPending == selected)
+                {
+                    int decision;
+
+                    cout << "\nSelected Donor: " << donorID << endl;
+
+                    cout << "1. Approve" << endl;
+                    cout << "2. Reject" << endl;
+
+                    cout << "Enter choice: ";
+                    cin >> decision;
+
+                    if (decision == 1)
+                    {
+                        status = "Approved";
+
+                        lines[i] = donorID + "," +
+                                   donationType + "," +
+                                   details + "," +
+                                   address + "," +
+                                   status;
+
+                        ofstream notificationFile(
+                            "Data/notifications.txt",
+                            ios::app
+                        );
+
+                        if (notificationFile.is_open())
+                        {
+                            notificationFile
+                                << donorID << ","
+                                << "Your donation request has been approved."
+                                << endl;
+
+                            notificationFile.close();
+                        }
+
+                        cout << "\nDonor Approved." << endl;
+                    }
+                    else if (decision == 2)
+                    {
+                        status = "Rejected";
+
+                        lines[i] = donorID + "," +
+                                   donationType + "," +
+                                   details + "," +
+                                   address + "," +
+                                   status;
+
+                        ofstream notificationFile(
+                            "Data/notifications.txt",
+                            ios::app
+                        );
+
+                        if (notificationFile.is_open())
+                        {
+                            notificationFile
+                                << donorID << ","
+                                << "Your donation request has been rejected."
+                                << endl;
+
+                            notificationFile.close();
+                        }
+
+                        cout << "\nDonor Rejected." << endl;
+                    }
+                    else
+                    {
+                        cout << "Invalid Choice." << endl;
+                        return;
+                    }
+
+                    break;
+                }
+            }
+        }
+
+        ofstream outputFile("Data/donations.txt");
+
+        if (!outputFile.is_open())
+        {
+            cout << "Unable to update donation records." << endl;
+            return;
+        }
+
+        for (int i = 0; i < total; i++)
+        {
+            outputFile << lines[i] << endl;
+        }
+
+        outputFile.close();
+    }
+
+
     void hospitalMenu()
     {
         int choice;
@@ -577,7 +800,10 @@ public:
             cout << "\n======Hospital Menu======" << endl;
 
             cout << "1. View Donor Requests" << endl;
-            cout << "2. Logout" << endl;
+            cout << "2. Approve / Reject Donor" << endl;
+            cout << "3. View Blood Requests" << endl;
+            cout << "4. Approve / Reject Blood Request" << endl;
+            cout << "5. Logout" << endl;
 
             cout << "Enter choice: ";
             cin >> choice;
@@ -589,6 +815,18 @@ public:
                     break;
 
                 case 2:
+                    updateDonorRequest();
+                    break;
+
+                case 3:
+                    showReceiverRequests();
+                    break;
+
+                case 4:
+                    updateReceiverRequest();
+                    break;
+
+                case 5:
                     return;
 
                 default:
@@ -596,6 +834,244 @@ public:
             }
         }
     }
+    void showReceiverRequests()
+    {
+        ifstream file("Data/requests.txt");
+
+        if (!file.is_open())
+        {
+            cout << "No blood requests available." << endl;
+            return;
+        }
+
+        string line;
+        int count = 0;
+
+        cout << "\n======Blood Requests======" << endl;
+
+        while (getline(file, line))
+        {
+            stringstream ss(line);
+
+            string receiverID;
+            string bloodGroup;
+            string quantity;
+            string reason;
+            string status;
+
+            getline(ss, receiverID, ',');
+            getline(ss, bloodGroup, ',');
+            getline(ss, quantity, ',');
+            getline(ss, reason, ',');
+            getline(ss, status, ',');
+
+            if (status == "Pending")
+            {
+                count++;
+
+                cout << "\nRequest " << count << endl;
+                cout << "Receiver ID: " << receiverID << endl;
+                cout << "Blood Group: " << bloodGroup << endl;
+                cout << "Quantity: " << quantity << endl;
+                cout << "Reason: " << reason << endl;
+                cout << "Status: " << status << endl;
+            }
+        }
+
+        file.close();
+
+        if (count == 0)
+        {
+            cout << "No pending blood requests." << endl;
+        }
+    }
+
+    void updateReceiverRequest()
+{
+    ifstream file("Data/requests.txt");
+
+    if (!file.is_open())
+    {
+        cout << "No blood requests available." << endl;
+        return;
+    }
+
+    string lines[100];
+    int total = 0;
+
+    string line;
+
+    while (getline(file, line))
+    {
+        lines[total] = line;
+        total++;
+    }
+
+    file.close();
+
+    int pendingCount = 0;
+
+    cout << "\n======Pending Blood Requests======" << endl;
+
+    for (int i = 0; i < total; i++)
+    {
+        stringstream ss(lines[i]);
+
+        string receiverID;
+        string bloodGroup;
+        string quantity;
+        string reason;
+        string status;
+
+        getline(ss, receiverID, ',');
+        getline(ss, bloodGroup, ',');
+        getline(ss, quantity, ',');
+        getline(ss, reason, ',');
+        getline(ss, status, ',');
+
+        if (status == "Pending")
+        {
+            pendingCount++;
+
+            cout << pendingCount << ". "
+                 << "Receiver ID: " << receiverID
+                 << " | Blood Group: " << bloodGroup
+                 << " | Quantity: " << quantity << endl;
+        }
+    }
+
+    if (pendingCount == 0)
+    {
+        cout << "No pending blood requests." << endl;
+        return;
+    }
+
+    int selected;
+
+    cout << "\nSelect Request: ";
+    cin >> selected;
+
+    if (selected < 1 || selected > pendingCount)
+    {
+        cout << "Invalid Choice." << endl;
+        return;
+    }
+
+    int currentPending = 0;
+
+    for (int i = 0; i < total; i++)
+    {
+        stringstream ss(lines[i]);
+
+        string receiverID;
+        string bloodGroup;
+        string quantity;
+        string reason;
+        string status;
+
+        getline(ss, receiverID, ',');
+        getline(ss, bloodGroup, ',');
+        getline(ss, quantity, ',');
+        getline(ss, reason, ',');
+        getline(ss, status, ',');
+
+        if (status == "Pending")
+        {
+            currentPending++;
+
+            if (currentPending == selected)
+            {
+                int decision;
+
+                cout << "\nSelected Receiver: " << receiverID << endl;
+
+                cout << "1. Approve" << endl;
+                cout << "2. Reject" << endl;
+
+                cout << "Enter choice: ";
+                cin >> decision;
+
+                if (decision == 1)
+                {
+                    status = "Approved";
+
+                    lines[i] = receiverID + "," +
+                               bloodGroup + "," +
+                               quantity + "," +
+                               reason + "," +
+                               status;
+
+                    ofstream notificationFile(
+                        "Data/notifications.txt",
+                        ios::app
+                    );
+
+                    if (notificationFile.is_open())
+                    {
+                        notificationFile
+                            << receiverID << ","
+                            << "Your blood request has been approved."
+                            << endl;
+
+                        notificationFile.close();
+                    }
+
+                    cout << "\nBlood Request Approved." << endl;
+                }
+                else if (decision == 2)
+                {
+                    status = "Rejected";
+
+                    lines[i] = receiverID + "," +
+                               bloodGroup + "," +
+                               quantity + "," +
+                               reason + "," +
+                               status;
+
+                    ofstream notificationFile(
+                        "Data/notifications.txt",
+                        ios::app
+                    );
+
+                    if (notificationFile.is_open())
+                    {
+                        notificationFile
+                            << receiverID << ","
+                            << "Your blood request has been rejected."
+                            << endl;
+
+                        notificationFile.close();
+                    }
+
+                    cout << "\nBlood Request Rejected." << endl;
+                }
+                else
+                {
+                    cout << "Invalid Choice." << endl;
+                    return;
+                }
+
+                break;
+            }
+        }
+    }
+
+    ofstream outputFile("Data/requests.txt");
+
+    if (!outputFile.is_open())
+    {
+        cout << "Unable to update request records." << endl;
+        return;
+    }
+
+    for (int i = 0; i < total; i++)
+    {
+        outputFile << lines[i] << endl;
+    }
+
+    outputFile.close();
+}
+
 };
 
 class Admin
