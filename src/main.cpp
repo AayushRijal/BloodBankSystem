@@ -548,6 +548,144 @@ public:
     }
 };
 
+class BloodStock
+{
+public:
+
+    void showStock()
+    {
+        ifstream file("Data/bloodstock.txt");
+
+        if (!file.is_open())
+        {
+            cout << "Blood stock file not found." << endl;
+            return;
+        }
+
+        string line;
+
+        cout << "\n======Blood Stock======" << endl;
+
+        while (getline(file, line))
+        {
+            stringstream ss(line);
+
+            string bloodGroup;
+            string quantity;
+
+            getline(ss, bloodGroup, ',');
+            getline(ss, quantity, ',');
+
+            cout << bloodGroup << " : " << quantity << " units" << endl;
+        }
+
+        file.close();
+    }
+
+
+    int getStock(string bloodGroup)
+    {
+        ifstream file("Data/bloodstock.txt");
+
+        if (!file.is_open())
+        {
+            return 0;
+        }
+
+        string line;
+
+        while (getline(file, line))
+        {
+            stringstream ss(line);
+
+            string fileBloodGroup;
+            string quantity;
+
+            getline(ss, fileBloodGroup, ',');
+            getline(ss, quantity, ',');
+
+            if (fileBloodGroup == bloodGroup)
+            {
+                file.close();
+                return stoi(quantity);
+            }
+        }
+
+        file.close();
+
+        return 0;
+    }
+
+
+    void updateStock(string bloodGroup, int change)
+    {
+        ifstream file("Data/bloodstock.txt");
+
+        if (!file.is_open())
+        {
+            cout << "Blood stock file not found." << endl;
+            return;
+        }
+
+        string lines[8];
+        int total = 0;
+
+        string line;
+
+        while (getline(file, line))
+        {
+            lines[total] = line;
+            total++;
+        }
+
+        file.close();
+
+
+        for (int i = 0; i < total; i++)
+        {
+            stringstream ss(lines[i]);
+
+            string fileBloodGroup;
+            string quantity;
+
+            getline(ss, fileBloodGroup, ',');
+            getline(ss, quantity, ',');
+
+            if (fileBloodGroup == bloodGroup)
+            {
+                int currentStock = stoi(quantity);
+                int newStock = currentStock + change;
+
+                if (newStock < 0)
+                {
+                    cout << "Not enough blood in stock." << endl;
+                    return;
+                }
+
+                lines[i] = bloodGroup + "," + to_string(newStock);
+
+                break;
+            }
+        }
+
+
+        ofstream outputFile("Data/bloodstock.txt");
+
+        if (!outputFile.is_open())
+        {
+            cout << "Unable to update blood stock." << endl;
+            return;
+        }
+
+        for (int i = 0; i < total; i++)
+        {
+            outputFile << lines[i] << endl;
+        }
+
+        outputFile.close();
+    }
+};
+
 class Hospital
 {
 public:
@@ -712,6 +850,7 @@ public:
                     if (decision == 1)
                     {
                         status = "Approved";
+                        addDonatedBlood(donorID);
 
                         lines[i] = donorID + "," +
                                    donationType + "," +
@@ -804,6 +943,7 @@ public:
             cout << "3. View Blood Requests" << endl;
             cout << "4. Approve / Reject Blood Request" << endl;
             cout << "5. Logout" << endl;
+            cout << "6. View Blood Stock" << endl;
 
             cout << "Enter choice: ";
             cin >> choice;
@@ -829,10 +969,18 @@ public:
                 case 5:
                     return;
 
+                case 6:
+                {
+                    BloodStock stock;
+                    stock.showStock();
+                    break;
+                }
+
                 default:
                     cout << "Invalid Choice." << endl;
             }
         }
+
     }
     void showReceiverRequests()
     {
@@ -984,6 +1132,8 @@ public:
                 int decision;
 
                 cout << "\nSelected Receiver: " << receiverID << endl;
+                cout << "Blood Group: " << bloodGroup << endl;
+                cout << "Quantity Requested: " << quantity << endl;
 
                 cout << "1. Approve" << endl;
                 cout << "2. Reject" << endl;
@@ -993,6 +1143,28 @@ public:
 
                 if (decision == 1)
                 {
+                    int requestedQuantity = stoi(quantity);
+
+                    BloodStock stock;
+
+                    int availableStock = stock.getStock(bloodGroup);
+
+                    if (availableStock < requestedQuantity)
+                    {
+                        cout << "\nNot enough blood in stock." << endl;
+                        cout << "Available: "
+                             << availableStock << " units" << endl;
+                        cout << "Requested: "
+                             << requestedQuantity << " units" << endl;
+
+                        return;
+                    }
+
+                    stock.updateStock(
+                        bloodGroup,
+                        -requestedQuantity
+                    );
+
                     status = "Approved";
 
                     lines[i] = receiverID + "," +
@@ -1016,7 +1188,11 @@ public:
                         notificationFile.close();
                     }
 
-                    cout << "\nBlood Request Approved." << endl;
+                    cout << "\nBlood stock updated: -"
+                         << requestedQuantity
+                         << " " << bloodGroup << endl;
+
+                    cout << "Blood Request Approved." << endl;
                 }
                 else if (decision == 2)
                 {
@@ -1070,6 +1246,55 @@ public:
     }
 
     outputFile.close();
+}
+
+    void addDonatedBlood(string donorID)
+{
+    ifstream file("Data/users.txt");
+
+    if (!file.is_open())
+    {
+        cout << "Unable to find user data." << endl;
+        return;
+    }
+
+    string line;
+    string bloodGroup;
+
+    while (getline(file, line))
+    {
+        stringstream ss(line);
+
+        string fileID;
+        string password;
+        string name;
+        string fileBloodGroup;
+
+        getline(ss, fileID, ',');
+        getline(ss, password, ',');
+        getline(ss, name, ',');
+        getline(ss, fileBloodGroup, ',');
+
+        if (fileID == donorID)
+        {
+            bloodGroup = fileBloodGroup;
+            break;
+        }
+    }
+
+    file.close();
+
+    if (bloodGroup.empty())
+    {
+        cout << "Donor blood group not found." << endl;
+        return;
+    }
+
+    BloodStock stock;
+
+    stock.updateStock(bloodGroup, 1);
+
+    cout << "Blood stock updated: +" << bloodGroup << endl;
 }
 
 };
