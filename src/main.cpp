@@ -548,8 +548,7 @@ public:
     }
 };
 
-class BloodStock
-{
+class BloodStock{
 public:
 
     void showStock()
@@ -686,8 +685,7 @@ public:
     }
 };
 
-class Hospital
-{
+class Hospital{
 public:
 
     void showDonorRequests()
@@ -1299,8 +1297,7 @@ public:
 
 };
 
-class Admin
-{
+class Admin{
 public:
 
     void adminMenu()
@@ -1321,26 +1318,23 @@ public:
 
             switch (choice) {
                 case 1:
-                    cout << "======Donor Information======" << endl;
-                    cout << "No donor information available." << endl;
+                    donorView();
                     break;
 
 
                 case 2:
-                    cout << "======Receiver Information======" << endl;
-                    cout << "No receiver information available." << endl;
+                    receiverView();
                     break;
 
 
                 case 3:
-                    cout << "======Hospital Bank Queue======" << endl;
-                    cout << "No pending blood requests." << endl;
+                    hospitalQueue();
                     break;
 
 
                 case 4:
-                    cout << "======Blood Stock======" << endl;
-                    cout << "No blood stock information available." << endl;
+                    BloodStock stock;
+                    stock.showStock();
                     break;
 
 
@@ -1354,7 +1348,211 @@ public:
         }
     }
 
+    void donorView()
+    {
+        ifstream file("Data/donations.txt");
+
+        if (!file.is_open())
+        {
+            cout << "No donor records available." << endl;
+            return;
+        }
+
+        string line;
+        int count = 0;
+
+        cout << "\n======Donor Records======" << endl;
+
+        while (getline(file, line))
+        {
+            stringstream ss(line);
+
+            string donorID;
+            string donationType;
+            string details;
+            string address;
+            string status;
+
+            getline(ss, donorID, ',');
+            getline(ss, donationType, ',');
+            getline(ss, details, ',');
+            getline(ss, address, ',');
+            getline(ss, status, ',');
+
+            count++;
+
+            cout << "\nDonor " << count << endl;
+            cout << "User ID: " << donorID << endl;
+            cout << "Donation Type: " << donationType << endl;
+            cout << "Details: " << details << endl;
+            cout << "Address: " << address << endl;
+            cout << "Status: " << status << endl;
+        }
+
+        file.close();
+
+        if (count == 0)
+        {
+            cout << "No donor records available." << endl;
+        }
+    }
+
+    void receiverView()
+    {
+        ifstream file("Data/requests.txt");
+
+        if (!file.is_open())
+        {
+            cout << "No receiver records available." << endl;
+            return;
+        }
+
+        string line;
+        int count = 0;
+
+        cout << "\n======Receiver Information======" << endl;
+
+        while (getline(file, line))
+        {
+            stringstream ss(line);
+
+            string receiverID;
+            string bloodGroup;
+            string quantity;
+            string reason;
+            string status;
+
+            getline(ss, receiverID, ',');
+            getline(ss, bloodGroup, ',');
+            getline(ss, quantity, ',');
+            getline(ss, reason, ',');
+            getline(ss, status, ',');
+
+            count++;
+
+            cout << "\nReceiver " << count << endl;
+            cout << "User ID: " << receiverID << endl;
+            cout << "Blood Group: " << bloodGroup << endl;
+            cout << "Quantity: " << quantity << endl;
+            cout << "Reason: " << reason << endl;
+            cout << "Status: " << status << endl;
+        }
+
+        file.close();
+
+        if (count == 0)
+        {
+            cout << "No receiver records available." << endl;
+        }
+    }
+
+    void hospitalQueue(){
+    cout << "\n======Hospital Bank Queue======" << endl;
+
+    // Pending donor requests
+    ifstream donorFile("Data/donations.txt");
+
+    if (donorFile.is_open())
+    {
+        string line;
+        int count = 0;
+
+        cout << "\n--- Pending Donor Donations ---" << endl;
+
+        while (getline(donorFile, line))
+        {
+            stringstream ss(line);
+
+            string donorID;
+            string donationType;
+            string details;
+            string address;
+            string status;
+
+            getline(ss, donorID, ',');
+            getline(ss, donationType, ',');
+            getline(ss, details, ',');
+            getline(ss, address, ',');
+            getline(ss, status, ',');
+
+            if (status == "Pending")
+            {
+                count++;
+
+                cout << "\nDonor Request " << count << endl;
+                cout << "Donor ID: " << donorID << endl;
+                cout << "Donation Type: " << donationType << endl;
+                cout << "Details: " << details << endl;
+                cout << "Address: " << address << endl;
+            }
+        }
+
+        donorFile.close();
+
+        if (count == 0)
+        {
+            cout << "No pending donor donations." << endl;
+        }
+    }
+    else
+    {
+        cout << "Donor records file not found." << endl;
+    }
+
+
+    // Pending receiver requests
+    ifstream receiverFile("Data/requests.txt");
+
+    if (receiverFile.is_open())
+    {
+        string line;
+        int count = 0;
+
+        cout << "\n--- Pending Blood Requests ---" << endl;
+
+        while (getline(receiverFile, line))
+        {
+            stringstream ss(line);
+
+            string receiverID;
+            string bloodGroup;
+            string quantity;
+            string reason;
+            string status;
+
+            getline(ss, receiverID, ',');
+            getline(ss, bloodGroup, ',');
+            getline(ss, quantity, ',');
+            getline(ss, reason, ',');
+            getline(ss, status, ',');
+
+            if (status == "Pending")
+            {
+                count++;
+
+                cout << "\nBlood Request " << count << endl;
+                cout << "Receiver ID: " << receiverID << endl;
+                cout << "Blood Group: " << bloodGroup << endl;
+                cout << "Quantity: " << quantity << endl;
+                cout << "Reason: " << reason << endl;
+            }
+        }
+
+        receiverFile.close();
+
+        if (count == 0)
+        {
+            cout << "No pending blood requests." << endl;
+        }
+    }
+    else
+    {
+        cout << "Receiver records file not found." << endl;
+    }
+}
+
 };
+
 class BloodBankSystem {
 
 public:
