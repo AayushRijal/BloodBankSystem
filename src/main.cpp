@@ -4,6 +4,18 @@
 #include<sstream> //string stream
 using namespace std;
 
+bool validBloodGroup(string bloodGroup)
+{
+    return bloodGroup == "A+" ||
+           bloodGroup == "A-" ||
+           bloodGroup == "B+" ||
+           bloodGroup == "B-" ||
+           bloodGroup == "AB+" ||
+           bloodGroup == "AB-" ||
+           bloodGroup == "O+" ||
+           bloodGroup == "O-";
+}
+
 
 class User {
 private:
@@ -120,6 +132,12 @@ public:
 
             cout << "Enter Blood Group: ";
             cin >> bloodGroup;
+
+            if (!validBloodGroup(bloodGroup))
+            {
+                cout << "Invalid blood group." << endl;
+                return;
+            }
 
             cout << "Registration Successful." << endl;
 
@@ -415,7 +433,7 @@ public:
     void applyBlood(string userID) {
 
         string bloodGroup;
-        string quantity;
+        int quantity;
         string reason;
 
         cout << "======Apply for Blood======" << endl;
@@ -423,8 +441,24 @@ public:
         cout << "Enter Blood Group: ";
         cin >> bloodGroup;
 
+        if (!validBloodGroup(bloodGroup))
+        {
+            cout << "Invalid blood group." << endl;
+            return;
+        }
+
+
         cout << "Enter Quantity: ";
         cin >> quantity;
+
+        if (cin.fail() || quantity <= 0)
+        {
+            cin.clear();
+            cin.ignore(1000, '\n');
+
+            cout << "Invalid quantity." << endl;
+            return;
+        }
 
         cin.ignore();
 
@@ -790,7 +824,7 @@ public:
 
                 cout << pendingCount << ". "
                      << "Donor ID: " << donorID
-                     << " | Blood Group: " << donationType
+                     << " | Donation Type: " << donationType
                      << " | Address: " << address << endl;
             }
         }
@@ -1672,4 +1706,3 @@ int main() {
 
     return 0;
 }
-
