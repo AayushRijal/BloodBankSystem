@@ -303,6 +303,15 @@ public:
             cout << "Enter choice: ";
             cin >> choice;
 
+            if (cin.fail())
+            {
+                cin.clear();
+                cin.ignore(1000, '\n');
+
+                cout << "Invalid Input." << endl;
+                continue;
+            }
+
             switch (choice) {
 
                 case 1:
@@ -557,6 +566,14 @@ public:
             cout << "Enter choice: ";
             cin >> choice;
 
+            if (cin.fail())
+            {
+                cin.clear();
+                cin.ignore(1000, '\n');
+
+                cout << "Invalid Input." << endl;
+                continue;
+            }
 
             switch (choice) {
 
@@ -980,6 +997,15 @@ public:
             cout << "Enter choice: ";
             cin >> choice;
 
+            if (cin.fail())
+            {
+                cin.clear();
+                cin.ignore(1000, '\n');
+
+                cout << "Invalid Input." << endl;
+                continue;
+            }
+
             switch (choice)
             {
                 case 1:
@@ -1349,7 +1375,15 @@ public:
             cout << "Enter choice: ";
             cin >> choice;
 
+            if (cin.fail())
+            {
+                cin.clear();
+                cin.ignore(1000, '\n');
 
+                cout << "Invalid Input." << endl;
+                continue;
+            }
+            
             switch (choice) {
                 case 1:
                     donorView();
@@ -1611,6 +1645,14 @@ public:
             cout << "Enter choice: ";
             cin >> choice;
 
+            if (cin.fail())
+            {
+                cin.clear();
+                cin.ignore(1000, '\n');
+
+                cout << "Invalid Input." << endl;
+                continue;
+            }
 
             switch (choice) {
                 case 1:
