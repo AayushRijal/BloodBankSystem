@@ -2,6 +2,7 @@
 #include<string>
 #include<fstream>
 #include<sstream> //string stream
+#include<cctype>
 using namespace std;
 
 bool validBloodGroup(string bloodGroup)
@@ -16,6 +17,24 @@ bool validBloodGroup(string bloodGroup)
            bloodGroup == "O-";
 }
 
+bool validUserID(string id)
+{
+    if (id.empty())
+    {
+        return false;
+    }
+
+    for (char c : id)
+    {
+        if (!isalnum(c))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 
 class User {
 private:
@@ -23,21 +42,31 @@ private:
     string password;
     string name;
     string bloodGroup;
+    string accountType;
 
     bool registered = false;
 
 public:
 
-    void saveUser()
+    bool saveUser()
     {
         ofstream file("Data/users.txt", ios::app);
 
+        if (!file.is_open())
+        {
+            cout << "Unable to save user data." << endl;
+            return false;
+        }
+
         file << userID << ","
-             << password << ","
-             << name << ","
-             << bloodGroup << endl;
+        << password << ","
+        << name << ","
+        << bloodGroup << ","
+        << accountType << endl;
 
         file.close();
+
+        return true;
     }
     bool loadUser(string loginID, string loginPassword)
     {
@@ -59,11 +88,13 @@ public:
             string filePassword;
             string fileName;
             string fileBloodGroup;
+            string fileAccountType;
 
             getline(ss, fileID, ',');
             getline(ss, filePassword, ',');
             getline(ss, fileName, ',');
             getline(ss, fileBloodGroup, ',');
+            getline(ss, fileAccountType, ',');
 
             if(fileID == loginID && filePassword == loginPassword)
             {
@@ -71,6 +102,7 @@ public:
                 password = filePassword;
                 name = fileName;
                 bloodGroup = fileBloodGroup;
+                accountType = fileAccountType;
 
                 file.close();
                 return true;
@@ -97,7 +129,7 @@ public:
             stringstream ss(line);
 
             string fileID;
-
+    
             getline(ss, fileID, ',');
 
             if (fileID == id)
@@ -118,6 +150,12 @@ public:
             cout << "Enter User ID: ";
             cin >> userID;
 
+            if (!validUserID(userID))
+            {
+                cout << "Invalid User ID. Use only letters and numbers." << endl;
+                return;
+            }
+            
             if (userExists(userID))
             {
                 cout << "User ID already exists. Please use a different User ID." << endl;
@@ -126,6 +164,13 @@ public:
 
             cout << "Enter Password: ";
             cin >> password;
+
+            if (!validPassword(password))
+            {
+                cout << "Invalid Password. Password must be at least 4 characters." << endl;
+                return;
+            }
+
 
             cout << "Enter Name: ";
             cin >> name;
@@ -139,11 +184,13 @@ public:
                 return;
             }
 
-            cout << "Registration Successful." << endl;
+            accountType = "User";
 
-            registered = true;
-
-            saveUser();
+            if (saveUser())
+            {
+                cout << "Registration Successful." << endl;
+                registered = true;
+            }
         }
         else {
             cout << "User already registered. Please login." << endl;
@@ -163,6 +210,17 @@ public:
         cin >> loginPassword;
 
 
+        // if(loadUser(loginID, loginPassword))
+        // {
+        //     return true;
+        // }
+        // else
+        // {
+        //     cout << "Invalid User ID or Password." << endl;
+        //     return false;
+        // }
+
+        //test run code
         if(loadUser(loginID, loginPassword))
         {
             return true;
@@ -176,7 +234,15 @@ public:
     string getUserID() {
         return userID;
     }
+    string getAccountType()
+    {
+        return accountType;
+    }
 
+    bool validPassword(string password)
+    {
+        return password.length() >= 4;
+    }
 
 };
 
@@ -1627,20 +1693,17 @@ public:
 
     User user;
 
-    void userTypeMenu() {
-
+    void userMenu()
+    {
         int choice;
 
-
-        while (true) {
-            cout << "\n======User Type======" << endl;
+        while (true)
+        {
+            cout << "\n======User Menu======" << endl;
 
             cout << "1. Donor" << endl;
             cout << "2. Receiver" << endl;
-            cout << "3. Admin" << endl;
-            cout << "4. Hospital" << endl;
-            cout << "5. Exit" << endl;
-
+            cout << "3. Logout" << endl;
 
             cout << "Enter choice: ";
             cin >> choice;
@@ -1654,28 +1717,23 @@ public:
                 continue;
             }
 
-            switch (choice) {
+            switch (choice)
+            {
                 case 1:
+                {
                     Donor donor;
                     donor.donorMenu(user.getUserID());
                     break;
+                }
 
                 case 2:
+                {
                     Receiver receiver;
                     receiver.receiverMenu(user.getUserID());
                     break;
+                }
 
                 case 3:
-                    Admin admin;
-                    admin.adminMenu();
-                    break;
-
-                case 4:
-                    Hospital hospital;
-                    hospital.hospitalMenu();
-                    break;
-
-                case 5:
                     return;
 
                 default:
@@ -1683,6 +1741,8 @@ public:
             }
         }
     }
+
+
 
     void start() {
         bool firstTime = true;
@@ -1720,8 +1780,22 @@ public:
 
 
                 case 2:
-                    if (user.login()) {
-                        userTypeMenu();
+                    if (user.login())
+                    {
+                        if (user.getAccountType() == "Admin")
+                        {
+                            Admin admin;
+                            admin.adminMenu();
+                        }
+                        else if (user.getAccountType() == "Hospital")
+                        {
+                            Hospital hospital;
+                            hospital.hospitalMenu();
+                        }
+                        else
+                        {
+                            userMenu();
+                        }
                     }
                     break;
 
