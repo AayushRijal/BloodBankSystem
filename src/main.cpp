@@ -354,19 +354,19 @@ public:
     }
 
 
-    void donorMenu(string userID) {
-
+    void donorMenu(string userID)
+    {
         int choice;
 
-        while (true) {
-
-            cout << "\n======Donor Menu======" << endl;
+        while (true)
+        {
+            cout << "\n====== Donor Menu ======" << endl;
             cout << "1. History" << endl;
             cout << "2. Donate" << endl;
             cout << "3. Notification" << endl;
             cout << "4. Logout" << endl;
 
-            cout << "Enter choice: ";
+            cout << "\nEnter choice: ";
             cin >> choice;
 
             if (cin.fail())
@@ -374,12 +374,12 @@ public:
                 cin.clear();
                 cin.ignore(1000, '\n');
 
-                cout << "Invalid Input." << endl;
+                cout << "\nInvalid Input." << endl;
                 continue;
             }
 
-            switch (choice) {
-
+            switch (choice)
+            {
                 case 1:
                     donorHistory(userID);
                     break;
@@ -396,10 +396,11 @@ public:
                     return;
 
                 default:
-                    cout << "Invalid Choice." << endl;
+                    cout << "\nInvalid Choice." << endl;
             }
         }
     }
+
     void saveNotification(string userID, string message) {
 
         ofstream file("Data/notifications.txt", ios::app);
@@ -616,20 +617,19 @@ public:
     }
 
 
-    void receiverMenu(string userID) {
-
+    void receiverMenu(string userID)
+    {
         int choice;
 
-        while (true) {
-
-            cout << "\n======Receiver Menu======" << endl;
-
+        while (true)
+        {
+            cout << "\n====== Receiver Menu ======" << endl;
             cout << "1. History" << endl;
             cout << "2. Notification" << endl;
             cout << "3. Apply" << endl;
             cout << "4. Logout" << endl;
 
-            cout << "Enter choice: ";
+            cout << "\nEnter choice: ";
             cin >> choice;
 
             if (cin.fail())
@@ -637,12 +637,12 @@ public:
                 cin.clear();
                 cin.ignore(1000, '\n');
 
-                cout << "Invalid Input." << endl;
+                cout << "\nInvalid Input." << endl;
                 continue;
             }
 
-            switch (choice) {
-
+            switch (choice)
+            {
                 case 1:
                     receiverHistory(userID);
                     break;
@@ -659,7 +659,7 @@ public:
                     return;
 
                 default:
-                    cout << "Invalid Choice." << endl;
+                    cout << "\nInvalid Choice." << endl;
             }
         }
     }
@@ -1051,16 +1051,15 @@ public:
 
         while (true)
         {
-            cout << "\n======Hospital Menu======" << endl;
-
+            cout << "\n====== Hospital Menu ======" << endl;
             cout << "1. View Donor Requests" << endl;
             cout << "2. Approve / Reject Donor" << endl;
             cout << "3. View Blood Requests" << endl;
             cout << "4. Approve / Reject Blood Request" << endl;
-            cout << "5. Logout" << endl;
-            cout << "6. View Blood Stock" << endl;
+            cout << "5. View Blood Stock" << endl;
+            cout << "6. Logout" << endl;
 
-            cout << "Enter choice: ";
+            cout << "\nEnter choice: ";
             cin >> choice;
 
             if (cin.fail())
@@ -1068,7 +1067,7 @@ public:
                 cin.clear();
                 cin.ignore(1000, '\n');
 
-                cout << "Invalid Input." << endl;
+                cout << "\nInvalid Input." << endl;
                 continue;
             }
 
@@ -1091,21 +1090,21 @@ public:
                     break;
 
                 case 5:
-                    return;
-
-                case 6:
                 {
                     BloodStock stock;
                     stock.showStock();
                     break;
                 }
 
+                case 6:
+                    return;
+
                 default:
-                    cout << "Invalid Choice." << endl;
+                    cout << "\nInvalid Choice." << endl;
             }
         }
-
     }
+
     void showReceiverRequests()
     {
         ifstream file("Data/requests.txt");
@@ -1430,15 +1429,16 @@ public:
     {
         int choice;
 
-        while (true) {
-            cout << "\n======Admin Menu======" << endl;
+        while (true)
+        {
+            cout << "\n====== Admin Menu ======" << endl;
             cout << "1. Donor View" << endl;
             cout << "2. Receiver View" << endl;
             cout << "3. Hospital Bank Queue" << endl;
             cout << "4. Live Stock" << endl;
             cout << "5. Logout" << endl;
 
-            cout << "Enter choice: ";
+            cout << "\nEnter choice: ";
             cin >> choice;
 
             if (cin.fail())
@@ -1446,38 +1446,36 @@ public:
                 cin.clear();
                 cin.ignore(1000, '\n');
 
-                cout << "Invalid Input." << endl;
+                cout << "\nInvalid Input." << endl;
                 continue;
             }
-            
-            switch (choice) {
+
+            switch (choice)
+            {
                 case 1:
                     donorView();
                     break;
-
 
                 case 2:
                     receiverView();
                     break;
 
-
                 case 3:
                     hospitalQueue();
                     break;
 
-
                 case 4:
+                {
                     BloodStock stock;
                     stock.showStock();
                     break;
-
+                }
 
                 case 5:
                     return;
 
-
                 default:
-                    cout << "Invalid Choice." << endl;
+                    cout << "\nInvalid Choice." << endl;
             }
         }
     }
@@ -1699,13 +1697,12 @@ public:
 
         while (true)
         {
-            cout << "\n======User Menu======" << endl;
-
+            cout << "\n====== User Menu ======" << endl;
             cout << "1. Donor" << endl;
             cout << "2. Receiver" << endl;
             cout << "3. Logout" << endl;
 
-            cout << "Enter choice: ";
+            cout << "\nEnter choice: ";
             cin >> choice;
 
             if (cin.fail())
@@ -1713,7 +1710,7 @@ public:
                 cin.clear();
                 cin.ignore(1000, '\n');
 
-                cout << "Invalid Input." << endl;
+                cout << "\nInvalid Input." << endl;
                 continue;
             }
 
@@ -1737,47 +1734,48 @@ public:
                     return;
 
                 default:
-                    cout << "Invalid Choice." << endl;
+                    cout << "\nInvalid Choice." << endl;
             }
         }
     }
 
 
 
-    void start() {
+    void start()
+    {
         bool firstTime = true;
         int choice;
 
-        while (true) {
-            if (firstTime) {
-                cout << "======Welcome to Blood Bank Life======" << endl;
+        while (true)
+        {
+            if (firstTime)
+            {
+                cout << "====== Welcome to Blood Bank Life ======" << endl;
                 firstTime = false;
             }
 
-
-            cout << "\n======Main Menu======" << endl;
+            cout << "\n====== Main Menu ======" << endl;
             cout << "1. User Registration" << endl;
             cout << "2. User Login" << endl;
             cout << "3. Exit" << endl;
 
-
-            cout << "Enter choice: ";
+            cout << "\nEnter choice: ";
             cin >> choice;
 
-            if(cin.fail())
+            if (cin.fail())
             {
                 cin.clear();
                 cin.ignore(1000, '\n');
-                cout << "Invalid Input." << endl;
+
+                cout << "\nInvalid Input." << endl;
                 continue;
             }
 
-
-            switch (choice) {
+            switch (choice)
+            {
                 case 1:
                     user.registration();
                     break;
-
 
                 case 2:
                     if (user.login())
@@ -1799,14 +1797,12 @@ public:
                     }
                     break;
 
-
                 case 3:
-                    cout << "Exiting program..." << endl;
+                    cout << "\nExiting program..." << endl;
                     return;
 
-
                 default:
-                    cout << "Invalid Choice." << endl;
+                    cout << "\nInvalid Choice." << endl;
             }
         }
     }
