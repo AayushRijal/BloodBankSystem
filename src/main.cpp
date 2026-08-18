@@ -17,6 +17,7 @@ bool validBloodGroup(string bloodGroup)
            bloodGroup == "O-";
 }
 
+
 bool validUserID(string id)
 {
     if (id.empty())
@@ -68,6 +69,8 @@ public:
 
         return true;
     }
+
+
     bool loadUser(string loginID, string loginPassword)
     {
         ifstream file("Data/users.txt");
@@ -113,6 +116,7 @@ public:
         return false;
     }
 
+
     bool userExists(string id)
     {
         ifstream file("Data/users.txt");
@@ -142,6 +146,7 @@ public:
         file.close();
         return false;
     }
+
 
     void registration() {
         if (registered == false) {
@@ -197,6 +202,7 @@ public:
         }
     }
 
+
     bool login() {
         string loginID;
         string loginPassword;
@@ -231,13 +237,18 @@ public:
             return false;
         }
     }
+
+
     string getUserID() {
         return userID;
     }
+
+
     string getAccountType()
     {
         return accountType;
     }
+
 
     bool validPassword(string password)
     {
@@ -249,10 +260,12 @@ public:
 class Donor {
 public:
 
-    void donorHistory(string userID) {
+    void donorHistory(string userID)
+    {
         ifstream file("Data/donations.txt");
 
-        if (!file.is_open()) {
+        if (!file.is_open())
+        {
             cout << "No donation history available." << endl;
             return;
         }
@@ -260,10 +273,10 @@ public:
         string line;
         bool found = false;
 
-        cout << "======Donation History======" << endl;
+        cout << "\n====== Donation History ======" << endl;
 
-        while (getline(file, line)) {
-
+        while (getline(file, line))
+        {
             stringstream ss(line);
 
             string donorID;
@@ -278,11 +291,12 @@ public:
             getline(ss, address, ',');
             getline(ss, status, ',');
 
-            if (donorID == userID) {
-                cout << "\nDonation Type: " << donationType;
-                cout << "\nDetails: " << details;
-                cout << "\nAddress: " << address;
-                cout << "\nStatus: " << status << endl;
+            if (donorID == userID)
+            {
+                cout << "\nDonation Type: " << donationType << endl;
+                cout << "Details: " << details << endl;
+                cout << "Address: " << address << endl;
+                cout << "Status: " << status << endl;
 
                 found = true;
             }
@@ -290,7 +304,8 @@ public:
 
         file.close();
 
-        if (!found) {
+        if (!found)
+        {
             cout << "No donation history available." << endl;
         }
     }
@@ -302,16 +317,16 @@ public:
         string details;
         string address;
 
-        cout << "======Donate Blood======" << endl;
+        cout << "====== Donate Blood ======" << endl;
 
         cout << "1. Regular" << endl;
         cout << "2. Emergency" << endl;
 
-        cout << "Select Donation Type: ";
+        cout << "\nSelect Donation Type: ";
         cin >> donationType;
 
         if (donationType != 1 && donationType != 2) {
-            cout << "Invalid Donation Type." << endl;
+            cout << "\nInvalid Donation Type." << endl;
             return;
         }
 
@@ -335,7 +350,7 @@ public:
         ofstream file("Data/donations.txt", ios::app);
 
         if (!file.is_open()) {
-            cout << "Unable to save donation." << endl;
+            cout << "\nUnable to save donation." << endl;
             return;
         }
 
@@ -401,6 +416,7 @@ public:
         }
     }
 
+
     void saveNotification(string userID, string message) {
 
         ofstream file("Data/notifications.txt", ios::app);
@@ -414,11 +430,14 @@ public:
 
         file.close();
     }
-    void showNotifications(string userID) {
 
+
+    void showNotifications(string userID)
+    {
         ifstream file("Data/notifications.txt");
 
-        if (!file.is_open()) {
+        if (!file.is_open())
+        {
             cout << "No notifications available." << endl;
             return;
         }
@@ -426,10 +445,10 @@ public:
         string line;
         bool found = false;
 
-        cout << "======Notifications======" << endl;
+        cout << "\n====== Notifications ======" << endl;
 
-        while (getline(file, line)) {
-
+        while (getline(file, line))
+        {
             stringstream ss(line);
 
             string notificationUserID;
@@ -438,8 +457,8 @@ public:
             getline(ss, notificationUserID, ',');
             getline(ss, message);
 
-            if (notificationUserID == userID) {
-
+            if (notificationUserID == userID)
+            {
                 cout << "- " << message << endl;
 
                 found = true;
@@ -448,7 +467,8 @@ public:
 
         file.close();
 
-        if (!found) {
+        if (!found)
+        {
             cout << "No new notifications available." << endl;
         }
     }
@@ -457,11 +477,12 @@ public:
 class Receiver {
 public:
 
-    void receiverHistory(string userID) {
-
+    void receiverHistory(string userID)
+    {
         ifstream file("Data/requests.txt");
 
-        if (!file.is_open()) {
+        if (!file.is_open())
+        {
             cout << "No request history available." << endl;
             return;
         }
@@ -469,10 +490,10 @@ public:
         string line;
         bool found = false;
 
-        cout << "======Request History======" << endl;
+        cout << "\n====== Request History ======" << endl;
 
-        while (getline(file, line)) {
-
+        while (getline(file, line))
+        {
             stringstream ss(line);
 
             string receiverID;
@@ -487,12 +508,12 @@ public:
             getline(ss, reason, ',');
             getline(ss, status, ',');
 
-            if (receiverID == userID) {
-
-                cout << "\nBlood Group: " << bloodGroup;
-                cout << "\nQuantity: " << quantity;
-                cout << "\nReason: " << reason;
-                cout << "\nStatus: " << status << endl;
+            if (receiverID == userID)
+            {
+                cout << "\nBlood Group: " << bloodGroup << endl;
+                cout << "Quantity: " << quantity << endl;
+                cout << "Reason: " << reason << endl;
+                cout << "Status: " << status << endl;
 
                 found = true;
             }
@@ -500,29 +521,29 @@ public:
 
         file.close();
 
-        if (!found) {
+        if (!found)
+        {
             cout << "No request history available." << endl;
         }
     }
 
 
-    void applyBlood(string userID) {
-
+    void applyBlood(string userID)
+    {
         string bloodGroup;
         int quantity;
         string reason;
 
-        cout << "======Apply for Blood======" << endl;
+        cout << "====== Apply for Blood ======" << endl;
 
         cout << "Enter Blood Group: ";
         cin >> bloodGroup;
 
         if (!validBloodGroup(bloodGroup))
         {
-            cout << "Invalid blood group." << endl;
+            cout << "\nInvalid Blood Group." << endl;
             return;
         }
-
 
         cout << "Enter Quantity: ";
         cin >> quantity;
@@ -532,7 +553,7 @@ public:
             cin.clear();
             cin.ignore(1000, '\n');
 
-            cout << "Invalid quantity." << endl;
+            cout << "\nInvalid Quantity." << endl;
             return;
         }
 
@@ -541,11 +562,11 @@ public:
         cout << "Enter Reason: ";
         getline(cin, reason);
 
-
         ofstream file("Data/requests.txt", ios::app);
 
-        if (!file.is_open()) {
-            cout << "Unable to save blood request." << endl;
+        if (!file.is_open())
+        {
+            cout << "\nUnable to save blood request." << endl;
             return;
         }
 
@@ -557,12 +578,10 @@ public:
 
         file.close();
 
-
-        // Save notification
         ofstream notificationFile("Data/notifications.txt", ios::app);
 
-        if (notificationFile.is_open()) {
-
+        if (notificationFile.is_open())
+        {
             notificationFile
                 << userID << ","
                 << "Your blood request has been submitted and is pending approval."
@@ -571,17 +590,17 @@ public:
             notificationFile.close();
         }
 
-
-        cout << "\nBlood Request Submitted." << endl;
+        cout << "\nBlood request submitted successfully." << endl;
         cout << "Status: Pending" << endl;
     }
 
 
-    void showNotifications(string userID) {
-
+    void showNotifications(string userID)
+    {
         ifstream file("Data/notifications.txt");
 
-        if (!file.is_open()) {
+        if (!file.is_open())
+        {
             cout << "No notifications available." << endl;
             return;
         }
@@ -589,10 +608,10 @@ public:
         string line;
         bool found = false;
 
-        cout << "======Notifications======" << endl;
+        cout << "\n====== Notifications ======" << endl;
 
-        while (getline(file, line)) {
-
+        while (getline(file, line))
+        {
             stringstream ss(line);
 
             string notificationUserID;
@@ -601,8 +620,8 @@ public:
             getline(ss, notificationUserID, ',');
             getline(ss, message);
 
-            if (notificationUserID == userID) {
-
+            if (notificationUserID == userID)
+            {
                 cout << "- " << message << endl;
 
                 found = true;
@@ -611,7 +630,8 @@ public:
 
         file.close();
 
-        if (!found) {
+        if (!found)
+        {
             cout << "No new notifications available." << endl;
         }
     }
@@ -680,7 +700,7 @@ public:
 
         string line;
 
-        cout << "\n======Blood Stock======" << endl;
+        cout << "\n====== Blood Stock ======" << endl;
 
         while (getline(file, line))
         {
@@ -883,7 +903,7 @@ public:
 
         int pendingCount = 0;
 
-        cout << "\n======Pending Donor Requests======" << endl;
+        cout << "\n====== Pending Donor Requests ======" << endl;
 
         for (int i = 0; i < total; i++)
         {
@@ -924,7 +944,7 @@ public:
 
         if (selected < 1 || selected > pendingCount)
         {
-            cout << "Invalid Choice." << endl;
+            cout << "\nInvalid Choice." << endl;
             return;
         }
 
@@ -956,10 +976,10 @@ public:
 
                     cout << "\nSelected Donor: " << donorID << endl;
 
-                    cout << "1. Approve" << endl;
+                    cout << "\n1. Approve" << endl;
                     cout << "2. Reject" << endl;
 
-                    cout << "Enter choice: ";
+                    cout << "\nEnter choice: ";
                     cin >> decision;
 
                     if (decision == 1)
@@ -1019,7 +1039,7 @@ public:
                     }
                     else
                     {
-                        cout << "Invalid Choice." << endl;
+                        cout << "\nInvalid Choice." << endl;
                         return;
                     }
 
@@ -1105,6 +1125,7 @@ public:
         }
     }
 
+
     void showReceiverRequests()
     {
         ifstream file("Data/requests.txt");
@@ -1157,7 +1178,8 @@ public:
         }
     }
 
-    void updateReceiverRequest()
+
+void updateReceiverRequest()
 {
     ifstream file("Data/requests.txt");
 
@@ -1182,7 +1204,7 @@ public:
 
     int pendingCount = 0;
 
-    cout << "\n======Pending Blood Requests======" << endl;
+    cout << "\n====== Pending Blood Requests ======" << endl;
 
     for (int i = 0; i < total; i++)
     {
@@ -1219,12 +1241,12 @@ public:
 
     int selected;
 
-    cout << "\nSelect Request: ";
+    cout << "\nSelect blood request: ";
     cin >> selected;
 
     if (selected < 1 || selected > pendingCount)
     {
-        cout << "Invalid Choice." << endl;
+        cout << "\nInvalid Choice." << endl;
         return;
     }
 
@@ -1258,10 +1280,10 @@ public:
                 cout << "Blood Group: " << bloodGroup << endl;
                 cout << "Quantity Requested: " << quantity << endl;
 
-                cout << "1. Approve" << endl;
+                cout << "\n1. Approve" << endl;
                 cout << "2. Reject" << endl;
 
-                cout << "Enter choice: ";
+                cout << "\nEnter choice: ";
                 cin >> decision;
 
                 if (decision == 1)
@@ -1315,7 +1337,7 @@ public:
                          << requestedQuantity
                          << " " << bloodGroup << endl;
 
-                    cout << "Blood Request Approved." << endl;
+                    cout << "Blood request approved." << endl;
                 }
                 else if (decision == 2)
                 {
@@ -1342,11 +1364,11 @@ public:
                         notificationFile.close();
                     }
 
-                    cout << "\nBlood Request Rejected." << endl;
+                    cout << "\nBlood request rejected." << endl;
                 }
                 else
                 {
-                    cout << "Invalid Choice." << endl;
+                    cout << "\nInvalid Choice." << endl;
                     return;
                 }
 
@@ -1370,6 +1392,7 @@ public:
 
     outputFile.close();
 }
+
 
     void addDonatedBlood(string donorID)
 {
@@ -1480,6 +1503,7 @@ public:
         }
     }
 
+
     void donorView()
     {
         ifstream file("Data/donations.txt");
@@ -1529,6 +1553,7 @@ public:
         }
     }
 
+
     void receiverView()
     {
         ifstream file("Data/requests.txt");
@@ -1577,6 +1602,7 @@ public:
             cout << "No receiver records available." << endl;
         }
     }
+
 
     void hospitalQueue(){
     cout << "\n======Hospital Bank Queue======" << endl;
@@ -1738,7 +1764,6 @@ public:
             }
         }
     }
-
 
 
     void start()
