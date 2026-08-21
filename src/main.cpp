@@ -879,190 +879,192 @@ public:
 
 
     void updateDonorRequest()
+{
+    ifstream file("Data/donations.txt");
+
+    if (!file.is_open())
     {
-        ifstream file("Data/donations.txt");
-
-        if (!file.is_open())
-        {
-            cout << "No donor requests available." << endl;
-            return;
-        }
-
-        string lines[100];
-        int total = 0;
-
-        string line;
-
-        while (getline(file, line))
-        {
-            lines[total] = line;
-            total++;
-        }
-
-        file.close();
-
-        int pendingCount = 0;
-
-        cout << "\n====== Pending Donor Requests ======" << endl;
-
-        for (int i = 0; i < total; i++)
-        {
-            stringstream ss(lines[i]);
-
-            string donorID;
-            string donationType;
-            string details;
-            string address;
-            string status;
-
-            getline(ss, donorID, ',');
-            getline(ss, donationType, ',');
-            getline(ss, details, ',');
-            getline(ss, address, ',');
-            getline(ss, status, ',');
-
-            if (status == "Pending")
-            {
-                pendingCount++;
-
-                cout << pendingCount << ". "
-                     << "Donor ID: " << donorID
-                     << " | Donation Type: " << donationType
-                     << " | Address: " << address << endl;
-            }
-        }
-
-        if (pendingCount == 0)
-        {
-            cout << "No pending donor requests." << endl;
-            return;
-        }
-
-        int selected;
-        cout << "\nSelect Donor: ";
-        cin >> selected;
-
-        if (selected < 1 || selected > pendingCount)
-        {
-            cout << "\nInvalid Choice." << endl;
-            return;
-        }
-
-        int currentPending = 0;
-
-        for (int i = 0; i < total; i++)
-        {
-            stringstream ss(lines[i]);
-
-            string donorID;
-            string donationType;
-            string details;
-            string address;
-            string status;
-
-            getline(ss, donorID, ',');
-            getline(ss, donationType, ',');
-            getline(ss, details, ',');
-            getline(ss, address, ',');
-            getline(ss, status, ',');
-
-            if (status == "Pending")
-            {
-                currentPending++;
-
-                if (currentPending == selected)
-                {
-                    int decision;
-
-                    cout << "\nSelected Donor: " << donorID << endl;
-
-                    cout << "\n1. Approve" << endl;
-                    cout << "2. Reject" << endl;
-
-                    cout << "\nEnter choice: ";
-                    cin >> decision;
-
-                    if (decision == 1)
-                    {
-                        status = "Approved";
-                        addDonatedBlood(donorID);
-
-                        lines[i] = donorID + "," +
-                                   donationType + "," +
-                                   details + "," +
-                                   address + "," +
-                                   status;
-
-                        ofstream notificationFile(
-                            "Data/notifications.txt",
-                            ios::app
-                        );
-
-                        if (notificationFile.is_open())
-                        {
-                            notificationFile
-                                << donorID << ","
-                                << "Your donation request has been approved."
-                                << endl;
-
-                            notificationFile.close();
-                        }
-
-                        cout << "\nDonor Approved." << endl;
-                    }
-                    else if (decision == 2)
-                    {
-                        status = "Rejected";
-
-                        lines[i] = donorID + "," +
-                                   donationType + "," +
-                                   details + "," +
-                                   address + "," +
-                                   status;
-
-                        ofstream notificationFile(
-                            "Data/notifications.txt",
-                            ios::app
-                        );
-
-                        if (notificationFile.is_open())
-                        {
-                            notificationFile
-                                << donorID << ","
-                                << "Your donation request has been rejected."
-                                << endl;
-
-                            notificationFile.close();
-                        }
-
-                        cout << "\nDonor Rejected." << endl;
-                    }
-                    else
-                    {
-                        cout << "\nInvalid Choice." << endl;
-                        return;
-                    }
-
-                    break;
-                }
-            }
-        }
-
-        ofstream outputFile("Data/donations.txt");
-
-        if (!outputFile.is_open())
-        {
-            cout << "Unable to update donation records." << endl;
-            return;
-        }
-
-        for (int i = 0; i < total; i++)
-        {
-            outputFile << lines[i] << endl;
-        }
-
-        outputFile.close();
+        cout << "No donor requests available." << endl;
+        return;
     }
+
+    string lines[100];
+    int total = 0;
+
+    string line;
+
+    while (getline(file, line))
+    {
+        lines[total] = line;
+        total++;
+    }
+
+    file.close();
+
+    int pendingCount = 0;
+
+    cout << "\n====== Pending Donor Requests ======" << endl;
+
+    for (int i = 0; i < total; i++)
+    {
+        stringstream ss(lines[i]);
+
+        string donorID;
+        string donationType;
+        string details;
+        string address;
+        string status;
+
+        getline(ss, donorID, ',');
+        getline(ss, donationType, ',');
+        getline(ss, details, ',');
+        getline(ss, address, ',');
+        getline(ss, status, ',');
+
+        if (status == "Pending")
+        {
+            pendingCount++;
+
+            cout << pendingCount << ". "
+                 << "Donor ID: " << donorID
+                 << " | Donation Type: " << donationType
+                 << " | Address: " << address << endl;
+        }
+    }
+
+    if (pendingCount == 0)
+    {
+        cout << "No pending donor requests." << endl;
+        return;
+    }
+
+    int selected;
+
+    cout << "\nSelect donor request: ";
+    cin >> selected;
+
+    if (selected < 1 || selected > pendingCount)
+    {
+        cout << "\nInvalid Choice." << endl;
+        return;
+    }
+
+    int currentPending = 0;
+
+    for (int i = 0; i < total; i++)
+    {
+        stringstream ss(lines[i]);
+
+        string donorID;
+        string donationType;
+        string details;
+        string address;
+        string status;
+
+        getline(ss, donorID, ',');
+        getline(ss, donationType, ',');
+        getline(ss, details, ',');
+        getline(ss, address, ',');
+        getline(ss, status, ',');
+
+        if (status == "Pending")
+        {
+            currentPending++;
+
+            if (currentPending == selected)
+            {
+                int decision;
+
+                cout << "\nSelected Donor: " << donorID << endl;
+
+                cout << "\n1. Approve" << endl;
+                cout << "2. Reject" << endl;
+
+                cout << "\nEnter choice: ";
+                cin >> decision;
+
+                if (decision == 1)
+                {
+                    status = "Approved";
+
+                    addDonatedBlood(donorID);
+
+                    lines[i] = donorID + "," +
+                               donationType + "," +
+                               details + "," +
+                               address + "," +
+                               status;
+
+                    ofstream notificationFile(
+                        "Data/notifications.txt",
+                        ios::app
+                    );
+
+                    if (notificationFile.is_open())
+                    {
+                        notificationFile
+                            << donorID << ","
+                            << "Your donation request has been approved."
+                            << endl;
+
+                        notificationFile.close();
+                    }
+
+                    cout << "\nDonor request approved." << endl;
+                }
+                else if (decision == 2)
+                {
+                    status = "Rejected";
+
+                    lines[i] = donorID + "," +
+                               donationType + "," +
+                               details + "," +
+                               address + "," +
+                               status;
+
+                    ofstream notificationFile(
+                        "Data/notifications.txt",
+                        ios::app
+                    );
+
+                    if (notificationFile.is_open())
+                    {
+                        notificationFile
+                            << donorID << ","
+                            << "Your donation request has been rejected."
+                            << endl;
+
+                        notificationFile.close();
+                    }
+
+                    cout << "\nDonor request rejected." << endl;
+                }
+                else
+                {
+                    cout << "\nInvalid Choice." << endl;
+                    return;
+                }
+
+                break;
+            }
+        }
+    }
+
+    ofstream outputFile("Data/donations.txt");
+
+    if (!outputFile.is_open())
+    {
+        cout << "Unable to update donation records." << endl;
+        return;
+    }
+
+    for (int i = 0; i < total; i++)
+    {
+        outputFile << lines[i] << endl;
+    }
+
+    outputFile.close();
+}
 
 
     void hospitalMenu()
@@ -1179,7 +1181,7 @@ public:
     }
 
 
-void updateReceiverRequest()
+    void updateReceiverRequest()
 {
     ifstream file("Data/requests.txt");
 
@@ -1517,7 +1519,7 @@ public:
         string line;
         int count = 0;
 
-        cout << "\n======Donor Records======" << endl;
+        cout << "\n====== Donor Records ======" << endl;
 
         while (getline(file, line))
         {
@@ -1567,7 +1569,7 @@ public:
         string line;
         int count = 0;
 
-        cout << "\n======Receiver Information======" << endl;
+        cout << "\n====== Receiver Information ======" << endl;
 
         while (getline(file, line))
         {
@@ -1605,7 +1607,7 @@ public:
 
 
     void hospitalQueue(){
-    cout << "\n======Hospital Bank Queue======" << endl;
+    cout << "\n====== Hospital Bank Queue ======" << endl;
 
     // Pending donor requests
     ifstream donorFile("Data/donations.txt");
@@ -1656,7 +1658,6 @@ public:
     {
         cout << "Donor records file not found." << endl;
     }
-
 
     // Pending receiver requests
     ifstream receiverFile("Data/requests.txt");
