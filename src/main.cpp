@@ -1,10 +1,11 @@
 #include<iostream>
 #include<string>
 #include<fstream>
-#include<sstream> //string stream
-#include<cctype>
+#include<sstream> //string stream -> allows to combine multiple outputs in 1 string
+#include<cctype> // For character checking functions like isdigit()
 using namespace std;
 
+// Helper: accept only the eight standard blood-group labels used by this program.
 bool validBloodGroup(string bloodGroup)
 {
     return bloodGroup == "A+" ||
@@ -17,17 +18,17 @@ bool validBloodGroup(string bloodGroup)
            bloodGroup == "O-";
 }
 
-
-bool validUserID(string id)
+// Helper: phone number must contain exactly 10 numeric digits.
+bool validPhoneNumber(string phoneNumber)
 {
-    if (id.empty())
+    if (phoneNumber.length() != 10)
     {
         return false;
     }
 
-    for (char c : id)
+    for (char c : phoneNumber)
     {
-        if (!isalnum(c))
+        if (!isdigit(c))
         {
             return false;
         }
@@ -35,31 +36,46 @@ bool validUserID(string id)
 
     return true;
 }
+//Removes unnecessary spaces, tabs, and carriage returns from the beginning and end of a string.
+string trim(string text)
+{
+    while (!text.empty() && (text.front() == ' ' || text.front() == '\t'))
+    {
+        text.erase(text.begin());
+    }
 
+    while (!text.empty() && (text.back() == ' ' || text.back() == '\t' || text.back() == '\r'))
+    {
+        text.pop_back();
+    }
 
+    return text;
+}
+
+// SECTION 1 — USER: stores account details and handles registration, login, and personal reports.
 class User {
 private:
-    string userID;
+    string phoneNumber;
     string password;
     string name;
     string bloodGroup;
     string accountType;
-
-    bool registered = false;
+    bool registered = false;  // Tracks whether registration has occurred during the current program session.
 
 public:
 
+    // Saves a newly registered user's information by appending a record to the users file.
     bool saveUser()
     {
-        ofstream file("Data/users.txt", ios::app);
+        ofstream file("Data/users.txt", ios::app); //append mode to prevent overwriting
 
         if (!file.is_open())
         {
             cout << "Unable to save user data." << endl;
             return false;
         }
-
-        file << userID << ","
+        //store info in file
+        file << phoneNumber << ","
         << password << ","
         << name << ","
         << bloodGroup << ","
@@ -70,8 +86,8 @@ public:
         return true;
     }
 
-
-    bool loadUser(string loginID, string loginPassword)
+    // Read users.txt, split each comma-separated record, and find matching login credentials.
+    bool loadUser(string loginPhoneNumber, string loginPassword)
     {
         ifstream file("Data/users.txt");
 
@@ -83,25 +99,35 @@ public:
 
         string line;
 
+        //reads and checks each saved user records.
         while(getline(file, line))
         {
+            // Split this comma-separated line into its individual fields.
             stringstream ss(line);
 
-            string fileID;
+            string filePhoneNumber;
             string filePassword;
             string fileName;
             string fileBloodGroup;
             string fileAccountType;
 
-            getline(ss, fileID, ',');
+            //split csv records to fields
+            getline(ss, filePhoneNumber, ',');
             getline(ss, filePassword, ',');
             getline(ss, fileName, ',');
             getline(ss, fileBloodGroup, ',');
             getline(ss, fileAccountType, ',');
 
-            if(fileID == loginID && filePassword == loginPassword)
-            {
-                userID = fileID;
+            //trim/remove unwanted spaces
+            filePhoneNumber = trim(filePhoneNumber);
+            filePassword = trim(filePassword);
+            fileName = trim(fileName);
+            fileBloodGroup = trim(fileBloodGroup);
+            fileAccountType = trim(fileAccountType);
+
+            if(filePhoneNumber == loginPhoneNumber && filePassword == loginPassword)
+            { //load saved info to User object
+                phoneNumber = filePhoneNumber;
                 password = filePassword;
                 name = fileName;
                 bloodGroup = fileBloodGroup;
@@ -116,9 +142,10 @@ public:
         return false;
     }
 
-
-    bool userExists(string id)
+    // Search existing user records to prevent registering the same phone number twice.
+    bool userExists(string phoneNumberToCheck)
     {
+        // ifstream opens saved user records for reading.
         ifstream file("Data/users.txt");
 
         if (!file.is_open())
@@ -128,15 +155,16 @@ public:
 
         string line;
 
+        //search each record for the phone number
         while (getline(file, line))
         {
             stringstream ss(line);
 
-            string fileID;
-    
-            getline(ss, fileID, ',');
+            string filePhoneNumber;
 
-            if (fileID == id)
+            getline(ss, filePhoneNumber, ',');
+
+            if (filePhoneNumber == phoneNumberToCheck)
             {
                 file.close();
                 return true;
@@ -147,23 +175,23 @@ public:
         return false;
     }
 
-
+//register a user after validating input
     void registration() {
         if (registered == false) {
             cout << "======User Registration======" << endl;
 
-            cout << "Enter User ID: ";
-            cin >> userID;
+            cout << "Enter Phone Number: ";
+            cin >> phoneNumber;
 
-            if (!validUserID(userID))
+            if (!validPhoneNumber(phoneNumber))
             {
-                cout << "Invalid User ID. Use only letters and numbers." << endl;
+                cout << "Invalid Phone Number. Enter exactly 10 digits." << endl;
                 return;
             }
-            
-            if (userExists(userID))
+
+            if (userExists(phoneNumber))
             {
-                cout << "User ID already exists. Please use a different User ID." << endl;
+                cout << "Phone Number already exists. Please use a different Phone Number." << endl;
                 return;
             }
 
@@ -189,7 +217,7 @@ public:
                 return;
             }
 
-            accountType = "User";
+            accountType = "User"; //default
 
             if (saveUser())
             {
@@ -204,43 +232,31 @@ public:
 
 
     bool login() {
-        string loginID;
+        string loginPhoneNumber;
         string loginPassword;
 
         cout << "======User Login======" << endl;
 
-        cout << "Enter User ID: ";
-        cin >> loginID;
+        cout << "Enter Phone Number: ";
+        cin >> loginPhoneNumber;
 
         cout << "Enter Password: ";
         cin >> loginPassword;
 
-
-        // if(loadUser(loginID, loginPassword))
-        // {
-        //     return true;
-        // }
-        // else
-        // {
-        //     cout << "Invalid User ID or Password." << endl;
-        //     return false;
-        // }
-
-        //test run code
-        if(loadUser(loginID, loginPassword))
+        if(loadUser(loginPhoneNumber, loginPassword))
         {
             return true;
         }
         else
         {
-            cout << "Invalid User ID or Password." << endl;
+            cout << "Invalid Phone Number or Password." << endl;
             return false;
         }
     }
 
 
-    string getUserID() {
-        return userID;
+    string getPhoneNumber() {
+        return phoneNumber; //returns the phone number when function called. getter functio
     }
 
 
@@ -255,12 +271,282 @@ public:
         return password.length() >= 4;
     }
 
+
+    // Generates and saves a report containing personal details,
+    // donation history, blood requests, and notifications.
+
+    void generateReport()
+{
+        // Create a separate report filename for each user.
+    string reportFileName = "Data/report_" + phoneNumber + ".txt";
+
+    ofstream reportFile(reportFileName);
+
+    if (!reportFile.is_open())
+    {
+        cout << "Unable to generate report." << endl;
+        return;
+    }
+
+    string donationHistory[100];
+    int donationHistoryCount = 0;
+
+    string receivingHistory[100];
+    int receivingHistoryCount = 0;
+
+    string notificationHistory[100];
+    int notificationHistoryCount = 0;
+
+    int totalDonations = 0;
+    int approvedDonations = 0;
+    int pendingDonations = 0;
+    int rejectedDonations = 0;
+
+    int totalRequests = 0;
+    int approvedRequests = 0;
+    int pendingRequests = 0;
+    int rejectedRequests = 0;
+
+    int totalBloodReceived = 0;
+
+    // Read donation history
+    ifstream donationFile("Data/donations.txt");
+
+    if (donationFile.is_open())
+    {
+        string line;
+
+        while (getline(donationFile, line))
+        {
+            stringstream ss(line);
+
+            string donorPhoneNumber;
+            string donationType;
+            string details;
+            string address;
+            string status;
+
+            getline(ss, donorPhoneNumber, ',');
+            getline(ss, donationType, ',');
+            getline(ss, details, ',');
+            getline(ss, address, ',');
+            getline(ss, status, ',');
+
+            if (donorPhoneNumber == phoneNumber)
+            {
+                totalDonations++;
+
+                if (status == "Approved")
+                {
+                    approvedDonations++;
+                }
+                else if (status == "Pending")
+                {
+                    pendingDonations++;
+                }
+                else if (status == "Rejected")
+                {
+                    rejectedDonations++;
+                }
+
+                if (donationHistoryCount < 100)
+                {
+                    donationHistory[donationHistoryCount] =
+                        donationType + " | " +
+                        details + " | Address: " +
+                        address + " | Status: " +
+                        status;
+
+                    donationHistoryCount++;
+                }
+            }
+        }
+
+        donationFile.close();
+    }
+
+    // Read blood receiving history
+    ifstream requestFile("Data/requests.txt");
+
+    if (requestFile.is_open())
+    {
+        string line;
+
+        while (getline(requestFile, line))
+        {
+            stringstream ss(line);
+
+            string receiverPhoneNumber;
+            string bloodGroup;
+            string quantity;
+            string reason;
+            string status;
+
+            getline(ss, receiverPhoneNumber, ',');
+            getline(ss, bloodGroup, ',');
+            getline(ss, quantity, ',');
+            getline(ss, reason, ',');
+            getline(ss, status, ',');
+
+            if (receiverPhoneNumber == phoneNumber)
+            {
+                totalRequests++;
+
+                if (status == "Approved")
+                {
+                    approvedRequests++;
+                    if (!quantity.empty())
+                    {
+                        totalBloodReceived += stoi(quantity);
+                    }
+                }
+                else if (status == "Pending")
+                {
+                    pendingRequests++;
+                }
+                else if (status == "Rejected")
+                {
+                    rejectedRequests++;
+                }
+
+                if (receivingHistoryCount < 100)
+                {
+                    receivingHistory[receivingHistoryCount] =
+                        bloodGroup + " | " +
+                        quantity + " units | Reason: " +
+                        reason + " | Status: " +
+                        status;
+
+                    receivingHistoryCount++;
+                }
+            }
+        }
+
+        requestFile.close();
+    }
+
+    // Read notifications from file
+    ifstream notificationFile("Data/notifications.txt");
+
+    if (notificationFile.is_open())
+    {
+        string line;
+
+        while (getline(notificationFile, line))
+        {
+            stringstream ss(line);
+
+            string notificationPhoneNumber;
+            string message;
+
+            getline(ss, notificationPhoneNumber, ',');
+            getline(ss, message);
+
+            if (notificationPhoneNumber == phoneNumber)
+            {
+                if (notificationHistoryCount < 100)
+                {
+                    notificationHistory[notificationHistoryCount] = message;
+                    notificationHistoryCount++;
+                }
+            }
+        }
+
+        notificationFile.close();
+    }
+
+    stringstream report;
+
+    report << "========================================" << endl;
+    report << "       BLOOD BANK LIFE - MY REPORT      " << endl;
+    report << "========================================" << endl;
+
+    report << "\nPersonal Information" << endl;
+    report << "Phone Number: " << phoneNumber << endl;
+    report << "Name: " << name << endl;
+    report << "Blood Group: " << bloodGroup << endl;
+
+    report << "\n------ Donation Summary ------" << endl;
+    report << "Total Donation Requests: " << totalDonations << endl;
+    report << "Approved: " << approvedDonations << endl;
+    report << "Pending: " << pendingDonations << endl;
+    report << "Rejected: " << rejectedDonations << endl;
+
+    report << "\n------ Blood Receiving Summary ------" << endl;
+    report << "Total Blood Requests: " << totalRequests << endl;
+    report << "Approved: " << approvedRequests << endl;
+    report << "Pending: " << pendingRequests << endl;
+    report << "Rejected: " << rejectedRequests << endl;
+    report << "Total Blood Received: "
+           << totalBloodReceived << " units" << endl;
+
+    report << "\n------ Donation History ------" << endl;
+
+    if (donationHistoryCount == 0)
+    {
+        report << "No donation history available." << endl;
+    }
+    else
+    {
+        for (int i = 0; i < donationHistoryCount; i++)
+        {
+            report << i + 1 << ". "
+                   << donationHistory[i] << endl;
+        }
+    }
+
+    report << "\n------ Blood Receiving History ------" << endl;
+
+    if (receivingHistoryCount == 0)
+    {
+        report << "No blood receiving history available." << endl;
+    }
+    else
+    {
+        for (int i = 0; i < receivingHistoryCount; i++)
+        {
+            report << i + 1 << ". "
+                   << receivingHistory[i] << endl;
+        }
+    }
+
+    report << "\n------ Notifications ------" << endl;
+
+    if (notificationHistoryCount == 0)
+    {
+        report << "No notifications available." << endl;
+    }
+    else
+    {
+        for (int i = 0; i < notificationHistoryCount; i++)
+        {
+            report << i + 1 << ". "
+                   << notificationHistory[i] << endl;
+        }
+    }
+
+    report << "\n========================================" << endl;
+    report << "              End of Report             " << endl;
+    report << "========================================" << endl;
+
+    cout << "\n" << report.str();
+
+    reportFile << report.str();
+
+    reportFile.close();
+
+    cout << "\nReport saved to: " << reportFileName << endl;
+}
+
 };
 
+// SECTION 2 — DONOR: handles donation requests, donation history, and donor notifications.
 class Donor {
 public:
 
-    void donorHistory(string userID)
+    // Read donation records and display only records belonging to this donor.
+
+    void donorHistory(string phoneNumber)
     {
         ifstream file("Data/donations.txt");
 
@@ -291,7 +577,7 @@ public:
             getline(ss, address, ',');
             getline(ss, status, ',');
 
-            if (donorID == userID)
+            if (donorID == phoneNumber)
             {
                 cout << "\nDonation Type: " << donationType << endl;
                 cout << "Details: " << details << endl;
@@ -311,7 +597,7 @@ public:
     }
 
 
-    void donateBlood(string userID) {
+    void donateBlood(string phoneNumber) {
 
         int donationType;
         string details;
@@ -330,7 +616,7 @@ public:
             return;
         }
 
-        cin.ignore();
+        cin.ignore(1000, '\n');
 
         cout << "Enter Donation Details: ";
         getline(cin, details);
@@ -354,7 +640,7 @@ public:
             return;
         }
 
-        file << userID << ","
+        file << phoneNumber << ","
              << type << ","
              << details << ","
              << address << ","
@@ -362,14 +648,14 @@ public:
 
         file.close();
 
-        saveNotification(userID, "Your donation request has been submitted and is pending approval.");
+        saveNotification(phoneNumber, "Your donation request has been submitted and is pending approval.");
 
         cout << "\nDonation Request Submitted." << endl;
         cout << "Status: Pending" << endl;
     }
 
 
-    void donorMenu(string userID)
+    void donorMenu(string phoneNumber)
     {
         int choice;
 
@@ -384,6 +670,7 @@ public:
             cout << "\nEnter choice: ";
             cin >> choice;
 
+            // Clear invalid input state and discard the bad input before showing the menu again.
             if (cin.fail())
             {
                 cin.clear();
@@ -396,15 +683,15 @@ public:
             switch (choice)
             {
                 case 1:
-                    donorHistory(userID);
+                    donorHistory(phoneNumber);
                     break;
 
                 case 2:
-                    donateBlood(userID);
+                    donateBlood(phoneNumber);
                     break;
 
                 case 3:
-                    showNotifications(userID);
+                    showNotifications(phoneNumber);
                     break;
 
                 case 4:
@@ -417,7 +704,7 @@ public:
     }
 
 
-    void saveNotification(string userID, string message) {
+    void saveNotification(string phoneNumber, string message) {
 
         ofstream file("Data/notifications.txt", ios::app);
 
@@ -426,13 +713,13 @@ public:
             return;
         }
 
-        file << userID << "," << message << endl;
+        file << phoneNumber << "," << message << endl;
 
         file.close();
     }
 
-
-    void showNotifications(string userID)
+    // Read notifications and display only messages addressed to this user.
+    void showNotifications(string phoneNumber)
     {
         ifstream file("Data/notifications.txt");
 
@@ -451,13 +738,13 @@ public:
         {
             stringstream ss(line);
 
-            string notificationUserID;
+            string notificationphoneNumber;
             string message;
 
-            getline(ss, notificationUserID, ',');
+            getline(ss, notificationphoneNumber, ',');
             getline(ss, message);
 
-            if (notificationUserID == userID)
+            if (notificationphoneNumber == phoneNumber)
             {
                 cout << "- " << message << endl;
 
@@ -474,10 +761,12 @@ public:
     }
 };
 
+// SECTION 3 — RECEIVER: handles blood requests, request history, and receiver notifications.
 class Receiver {
 public:
 
-    void receiverHistory(string userID)
+    // Read request records and show the logged-in receiver's own history.
+    void receiverHistory(string phoneNumber)
     {
         ifstream file("Data/requests.txt");
 
@@ -508,7 +797,7 @@ public:
             getline(ss, reason, ',');
             getline(ss, status, ',');
 
-            if (receiverID == userID)
+            if (receiverID == phoneNumber)
             {
                 cout << "\nBlood Group: " << bloodGroup << endl;
                 cout << "Quantity: " << quantity << endl;
@@ -527,8 +816,8 @@ public:
         }
     }
 
-
-    void applyBlood(string userID)
+    // Validate blood group and quantity, then save a new request as Pending.
+    void applyBlood(string phoneNumber)
     {
         string bloodGroup;
         int quantity;
@@ -557,7 +846,7 @@ public:
             return;
         }
 
-        cin.ignore();
+        cin.ignore(1000, '\n');
 
         cout << "Enter Reason: ";
         getline(cin, reason);
@@ -570,7 +859,7 @@ public:
             return;
         }
 
-        file << userID << ","
+        file << phoneNumber << ","
              << bloodGroup << ","
              << quantity << ","
              << reason << ","
@@ -583,7 +872,7 @@ public:
         if (notificationFile.is_open())
         {
             notificationFile
-                << userID << ","
+                << phoneNumber << ","
                 << "Your blood request has been submitted and is pending approval."
                 << endl;
 
@@ -595,7 +884,8 @@ public:
     }
 
 
-    void showNotifications(string userID)
+    // Read notifications and display only messages addressed to this user.
+    void showNotifications(string phoneNumber)
     {
         ifstream file("Data/notifications.txt");
 
@@ -614,13 +904,13 @@ public:
         {
             stringstream ss(line);
 
-            string notificationUserID;
+            string notificationphoneNumber;
             string message;
 
-            getline(ss, notificationUserID, ',');
+            getline(ss, notificationphoneNumber, ',');
             getline(ss, message);
 
-            if (notificationUserID == userID)
+            if (notificationphoneNumber == phoneNumber)
             {
                 cout << "- " << message << endl;
 
@@ -636,8 +926,8 @@ public:
         }
     }
 
-
-    void receiverMenu(string userID)
+    // Receiver navigation menu; options lead to history, notifications, or a new request.
+    void receiverMenu(string phoneNumber)
     {
         int choice;
 
@@ -652,6 +942,7 @@ public:
             cout << "\nEnter choice: ";
             cin >> choice;
 
+            // Clear invalid input state and discard the bad input before showing the menu again.
             if (cin.fail())
             {
                 cin.clear();
@@ -664,15 +955,15 @@ public:
             switch (choice)
             {
                 case 1:
-                    receiverHistory(userID);
+                    receiverHistory(phoneNumber);
                     break;
 
                 case 2:
-                    showNotifications(userID);
+                    showNotifications(phoneNumber);
                     break;
 
                 case 3:
-                    applyBlood(userID);
+                    applyBlood(phoneNumber);
                     break;
 
                 case 4:
@@ -685,8 +976,11 @@ public:
     }
 };
 
+// SECTION 4 — BLOOD STOCK: displays, checks, and updates available units for each blood group.
 class BloodStock{
 public:
+
+    // Read and display the current stock for each blood group.
 
     void showStock()
     {
@@ -704,6 +998,7 @@ public:
 
         while (getline(file, line))
         {
+            // Split this comma-separated line into its individual fields.
             stringstream ss(line);
 
             string bloodGroup;
@@ -718,7 +1013,7 @@ public:
         file.close();
     }
 
-
+    // Return the currently available quantity for the requested blood group.
     int getStock(string bloodGroup)
     {
         ifstream file("Data/bloodstock.txt");
@@ -753,6 +1048,7 @@ public:
     }
 
 
+    // Change stock by the supplied amount: positive adds units, negative removes units.
     void updateStock(string bloodGroup, int change)
     {
         ifstream file("Data/bloodstock.txt");
@@ -822,9 +1118,11 @@ public:
     }
 };
 
+// SECTION 5 — HOSPITAL: reviews pending requests and records approvals/rejections.
 class Hospital{
 public:
 
+    // Display donation requests waiting for hospital review.
     void showDonorRequests()
     {
         ifstream file("Data/donations.txt");
@@ -844,13 +1142,13 @@ public:
         {
             stringstream ss(line);
 
-            string donorID;
+            string donorPhoneNumber;
             string donationType;
             string details;
             string address;
             string status;
 
-            getline(ss, donorID, ',');
+            getline(ss, donorPhoneNumber, ',');
             getline(ss, donationType, ',');
             getline(ss, details, ',');
             getline(ss, address, ',');
@@ -861,7 +1159,7 @@ public:
                 count++;
 
                 cout << "\nDonor " << count << endl;
-                cout << "User ID: " << donorID << endl;
+                cout << "Phone Number: " << donorPhoneNumber << endl;
                 cout << "Donation Type: " << donationType << endl;
                 cout << "Details: " << details << endl;
                 cout << "Address: " << address << endl;
@@ -877,7 +1175,7 @@ public:
         }
     }
 
-
+    // Let the hospital approve/reject a donation, update its status, and notify the donor.
     void updateDonorRequest()
 {
     ifstream file("Data/donations.txt");
@@ -909,13 +1207,13 @@ public:
     {
         stringstream ss(lines[i]);
 
-        string donorID;
+        string donorPhoneNumber;
         string donationType;
         string details;
         string address;
         string status;
 
-        getline(ss, donorID, ',');
+        getline(ss, donorPhoneNumber, ',');
         getline(ss, donationType, ',');
         getline(ss, details, ',');
         getline(ss, address, ',');
@@ -926,7 +1224,7 @@ public:
             pendingCount++;
 
             cout << pendingCount << ". "
-                 << "Donor ID: " << donorID
+                 << "Phone Number: " << donorPhoneNumber
                  << " | Donation Type: " << donationType
                  << " | Address: " << address << endl;
         }
@@ -955,13 +1253,13 @@ public:
     {
         stringstream ss(lines[i]);
 
-        string donorID;
+        string donorPhoneNumber;
         string donationType;
         string details;
         string address;
         string status;
 
-        getline(ss, donorID, ',');
+        getline(ss, donorPhoneNumber, ',');
         getline(ss, donationType, ',');
         getline(ss, details, ',');
         getline(ss, address, ',');
@@ -975,7 +1273,7 @@ public:
             {
                 int decision;
 
-                cout << "\nSelected Donor: " << donorID << endl;
+                cout << "\nSelected Donor: " << donorPhoneNumber << endl;
 
                 cout << "\n1. Approve" << endl;
                 cout << "2. Reject" << endl;
@@ -987,9 +1285,9 @@ public:
                 {
                     status = "Approved";
 
-                    addDonatedBlood(donorID);
+                    addDonatedBlood(donorPhoneNumber);
 
-                    lines[i] = donorID + "," +
+                    lines[i] = donorPhoneNumber + "," +
                                donationType + "," +
                                details + "," +
                                address + "," +
@@ -1003,7 +1301,7 @@ public:
                     if (notificationFile.is_open())
                     {
                         notificationFile
-                            << donorID << ","
+                            << donorPhoneNumber << ","
                             << "Your donation request has been approved."
                             << endl;
 
@@ -1016,7 +1314,7 @@ public:
                 {
                     status = "Rejected";
 
-                    lines[i] = donorID + "," +
+                    lines[i] = donorPhoneNumber + "," +
                                donationType + "," +
                                details + "," +
                                address + "," +
@@ -1030,7 +1328,7 @@ public:
                     if (notificationFile.is_open())
                     {
                         notificationFile
-                            << donorID << ","
+                            << donorPhoneNumber << ","
                             << "Your donation request has been rejected."
                             << endl;
 
@@ -1066,7 +1364,7 @@ public:
     outputFile.close();
 }
 
-
+    // Hospital navigation menu for viewing and processing donation/blood requests.
     void hospitalMenu()
     {
         int choice;
@@ -1127,7 +1425,7 @@ public:
         }
     }
 
-
+    // Display receiver blood requests and their current statuses.
     void showReceiverRequests()
     {
         ifstream file("Data/requests.txt");
@@ -1164,7 +1462,7 @@ public:
                 count++;
 
                 cout << "\nRequest " << count << endl;
-                cout << "Receiver ID: " << receiverID << endl;
+                cout << "Phone Number: " << receiverID << endl;
                 cout << "Blood Group: " << bloodGroup << endl;
                 cout << "Quantity: " << quantity << endl;
                 cout << "Reason: " << reason << endl;
@@ -1180,7 +1478,7 @@ public:
         }
     }
 
-
+    // Process a receiver request; approval requires enough stock and subtracts the quantity.
     void updateReceiverRequest()
 {
     ifstream file("Data/requests.txt");
@@ -1212,13 +1510,13 @@ public:
     {
         stringstream ss(lines[i]);
 
-        string receiverID;
+        string receiverPhoneNumber;
         string bloodGroup;
         string quantity;
         string reason;
         string status;
 
-        getline(ss, receiverID, ',');
+        getline(ss, receiverPhoneNumber, ',');
         getline(ss, bloodGroup, ',');
         getline(ss, quantity, ',');
         getline(ss, reason, ',');
@@ -1229,7 +1527,7 @@ public:
             pendingCount++;
 
             cout << pendingCount << ". "
-                 << "Receiver ID: " << receiverID
+                 << "Phone Number: " << receiverPhoneNumber
                  << " | Blood Group: " << bloodGroup
                  << " | Quantity: " << quantity << endl;
         }
@@ -1258,13 +1556,13 @@ public:
     {
         stringstream ss(lines[i]);
 
-        string receiverID;
+        string receiverPhoneNumber;
         string bloodGroup;
         string quantity;
         string reason;
         string status;
 
-        getline(ss, receiverID, ',');
+        getline(ss, receiverPhoneNumber, ',');
         getline(ss, bloodGroup, ',');
         getline(ss, quantity, ',');
         getline(ss, reason, ',');
@@ -1278,7 +1576,7 @@ public:
             {
                 int decision;
 
-                cout << "\nSelected Receiver: " << receiverID << endl;
+                cout << "\nSelected Receiver: " << receiverPhoneNumber << endl;
                 cout << "Blood Group: " << bloodGroup << endl;
                 cout << "Quantity Requested: " << quantity << endl;
 
@@ -1307,6 +1605,7 @@ public:
                         return;
                     }
 
+                    // Approved request: subtract the requested number of units from stock.
                     stock.updateStock(
                         bloodGroup,
                         -requestedQuantity
@@ -1314,7 +1613,7 @@ public:
 
                     status = "Approved";
 
-                    lines[i] = receiverID + "," +
+                    lines[i] = receiverPhoneNumber + "," +
                                bloodGroup + "," +
                                quantity + "," +
                                reason + "," +
@@ -1328,7 +1627,7 @@ public:
                     if (notificationFile.is_open())
                     {
                         notificationFile
-                            << receiverID << ","
+                            << receiverPhoneNumber << ","
                             << "Your blood request has been approved."
                             << endl;
 
@@ -1345,7 +1644,7 @@ public:
                 {
                     status = "Rejected";
 
-                    lines[i] = receiverID + "," +
+                    lines[i] = receiverPhoneNumber + "," +
                                bloodGroup + "," +
                                quantity + "," +
                                reason + "," +
@@ -1359,7 +1658,7 @@ public:
                     if (notificationFile.is_open())
                     {
                         notificationFile
-                            << receiverID << ","
+                            << receiverPhoneNumber << ","
                             << "Your blood request has been rejected."
                             << endl;
 
@@ -1395,8 +1694,8 @@ public:
     outputFile.close();
 }
 
-
-    void addDonatedBlood(string donorID)
+    // Find the donor's blood group in users.txt and add one unit after approval.
+    void addDonatedBlood(string donorPhoneNumber)
 {
     ifstream file("Data/users.txt");
 
@@ -1413,17 +1712,17 @@ public:
     {
         stringstream ss(line);
 
-        string fileID;
+        string filePhoneNumber;
         string password;
         string name;
         string fileBloodGroup;
 
-        getline(ss, fileID, ',');
+        getline(ss, filePhoneNumber, ',');
         getline(ss, password, ',');
         getline(ss, name, ',');
         getline(ss, fileBloodGroup, ',');
 
-        if (fileID == donorID)
+        if (filePhoneNumber == donorPhoneNumber)
         {
             bloodGroup = fileBloodGroup;
             break;
@@ -1447,9 +1746,11 @@ public:
 
 };
 
+// SECTION 6 — ADMIN: provides an overview of donor records, receiver records, queue, and stock.
 class Admin{
 public:
 
+    // Admin navigation menu; it mainly displays and monitors system information.
     void adminMenu()
     {
         int choice;
@@ -1505,7 +1806,7 @@ public:
         }
     }
 
-
+    // Read and display all saved donation records for administrative review.
     void donorView()
     {
         ifstream file("Data/donations.txt");
@@ -1525,13 +1826,13 @@ public:
         {
             stringstream ss(line);
 
-            string donorID;
+            string donorPhoneNumber;
             string donationType;
             string details;
             string address;
             string status;
 
-            getline(ss, donorID, ',');
+            getline(ss, donorPhoneNumber, ',');
             getline(ss, donationType, ',');
             getline(ss, details, ',');
             getline(ss, address, ',');
@@ -1540,7 +1841,7 @@ public:
             count++;
 
             cout << "\nDonor " << count << endl;
-            cout << "User ID: " << donorID << endl;
+            cout << "Phone Number: " << donorPhoneNumber << endl;
             cout << "Donation Type: " << donationType << endl;
             cout << "Details: " << details << endl;
             cout << "Address: " << address << endl;
@@ -1555,7 +1856,7 @@ public:
         }
     }
 
-
+    // Read and display all saved blood-request records for administrative review.
     void receiverView()
     {
         ifstream file("Data/requests.txt");
@@ -1575,13 +1876,13 @@ public:
         {
             stringstream ss(line);
 
-            string receiverID;
+            string receiverPhoneNumber;
             string bloodGroup;
             string quantity;
             string reason;
             string status;
 
-            getline(ss, receiverID, ',');
+            getline(ss, receiverPhoneNumber, ',');
             getline(ss, bloodGroup, ',');
             getline(ss, quantity, ',');
             getline(ss, reason, ',');
@@ -1590,7 +1891,7 @@ public:
             count++;
 
             cout << "\nReceiver " << count << endl;
-            cout << "User ID: " << receiverID << endl;
+            cout << "Phone Number: " << receiverPhoneNumber << endl;
             cout << "Blood Group: " << bloodGroup << endl;
             cout << "Quantity: " << quantity << endl;
             cout << "Reason: " << reason << endl;
@@ -1623,13 +1924,13 @@ public:
         {
             stringstream ss(line);
 
-            string donorID;
+            string donorPhoneNumber;
             string donationType;
             string details;
             string address;
             string status;
 
-            getline(ss, donorID, ',');
+            getline(ss, donorPhoneNumber, ',');
             getline(ss, donationType, ',');
             getline(ss, details, ',');
             getline(ss, address, ',');
@@ -1640,7 +1941,7 @@ public:
                 count++;
 
                 cout << "\nDonor Request " << count << endl;
-                cout << "Donor ID: " << donorID << endl;
+                cout << "Phone Number: " << donorPhoneNumber << endl;
                 cout << "Donation Type: " << donationType << endl;
                 cout << "Details: " << details << endl;
                 cout << "Address: " << address << endl;
@@ -1673,13 +1974,13 @@ public:
         {
             stringstream ss(line);
 
-            string receiverID;
+            string receiverPhoneNumber;
             string bloodGroup;
             string quantity;
             string reason;
             string status;
 
-            getline(ss, receiverID, ',');
+            getline(ss, receiverPhoneNumber, ',');
             getline(ss, bloodGroup, ',');
             getline(ss, quantity, ',');
             getline(ss, reason, ',');
@@ -1690,7 +1991,7 @@ public:
                 count++;
 
                 cout << "\nBlood Request " << count << endl;
-                cout << "Receiver ID: " << receiverID << endl;
+                cout << "Phone Number: " << receiverPhoneNumber << endl;
                 cout << "Blood Group: " << bloodGroup << endl;
                 cout << "Quantity: " << quantity << endl;
                 cout << "Reason: " << reason << endl;
@@ -1712,12 +2013,13 @@ public:
 
 };
 
+// SECTION 7 — MAIN SYSTEM: connects the menus and routes users to the correct role.
 class BloodBankSystem {
 
 public:
 
     User user;
-
+    // Normal users can choose Donor, Receiver, My Report, or Logout.
     void userMenu()
     {
         int choice;
@@ -1727,7 +2029,8 @@ public:
             cout << "\n====== User Menu ======" << endl;
             cout << "1. Donor" << endl;
             cout << "2. Receiver" << endl;
-            cout << "3. Logout" << endl;
+            cout << "3. My Report" << endl;
+            cout << "4. Logout" << endl;
 
             cout << "\nEnter choice: ";
             cin >> choice;
@@ -1746,18 +2049,22 @@ public:
                 case 1:
                 {
                     Donor donor;
-                    donor.donorMenu(user.getUserID());
+                    donor.donorMenu(user.getPhoneNumber());
                     break;
                 }
 
                 case 2:
                 {
                     Receiver receiver;
-                    receiver.receiverMenu(user.getUserID());
+                    receiver.receiverMenu(user.getPhoneNumber());
                     break;
                 }
 
                 case 3:
+                    user.generateReport();
+                    break;
+
+                case 4:
                     return;
 
                 default:
@@ -1766,7 +2073,7 @@ public:
         }
     }
 
-
+    // Main loop: show registration/login/exit and route successful logins by accountType.
     void start()
     {
         bool firstTime = true;
@@ -1806,12 +2113,14 @@ public:
                 case 2:
                     if (user.login())
                     {
-                        if (user.getAccountType() == "Admin")
+                        string accountType = trim(user.getAccountType());
+
+                        if (accountType == "Admin")
                         {
                             Admin admin;
                             admin.adminMenu();
                         }
-                        else if (user.getAccountType() == "Hospital")
+                        else if (accountType == "Hospital")
                         {
                             Hospital hospital;
                             hospital.hospitalMenu();
@@ -1835,7 +2144,7 @@ public:
 
 };
 
-
+// Program entry point: create the system object and start the application.
 int main() {
 
     BloodBankSystem bankSystem;
